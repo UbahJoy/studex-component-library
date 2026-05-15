@@ -5,10 +5,10 @@ Task 2 submission. A reusable UI component library built with React for the Stud
 ---
 
 ## Live Demo
-🔗 [View Component Library](https://YOUR-USERNAME.github.io/studex-component-library/)
+🔗https://ubahjoy.github.io/studex-component-library/
 
 ## GitHub Repository
-🔗 [View Code](https://github.com/YOUR-USERNAME/studex-component-library)
+🔗 https://github.com/UbahJoy/studex-component-library
 
 ---
 
@@ -180,4 +180,4 @@ All components use the same CSS variables (--accent, --bg, --text etc.) ensuring
 ---
 
 ## Author
-Built by Ubah Joy — Week 1 Task 2, Frontend Development Internship
+Built by Ubah Joy — Task 2, Frontend Development Internship
