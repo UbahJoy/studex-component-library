@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Studex – Component Library</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #020817;
+      --surface: #0a1628;
+      --surface2: #0f2040;
+      --accent: #2563eb;
+      --accent2: #ffffff;
+      --text: #ffffff;
+      --muted: #7ea4cc;
+      --border: rgba(37,99,235,0.25);
+      --danger: #ef4444;
+      --success: #10b981;
+    }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+
+    // ============================================================
+    // COMPONENT 1: BUTTON
+    // Props: label, variant, size, onClick, disabled
+    // ============================================================
+    function Button({ label = "Click Me", variant = "primary", size = "md", onClick, disabled = false }) {
+      const base = {
+        fontFamily: "'Syne', sans-serif",
+        fontWeight: 700,
+        borderRadius: "100px",
+        border: "none",
+        cursor: disabled ? "not-allowed" : "pointer",
+        opacity: disabled ? 0.5 : 1,
+        transition: "all 0.2s ease",
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: "8px",
+      };
+
+      const sizes = {
+        sm: { padding: "0.45rem 1rem", fontSize: "0.8rem" },
+        md: { padding: "0.7rem 1.6rem", fontSize: "0.95rem" },
+        lg: { padding: "0.95rem 2rem", fontSize: "1.05rem" },
+      };
+
+      const variants = {
+        primary: { background: "var(--accent)", color: "#fff", boxShadow: "0 0 20px rgba(37,99,235,0.3)" },
+        secondary: { background: "transparent", color: "var(--text)", border: "1px solid var(--border)" },
+        danger: { background: "var(--danger)", color: "#fff" },
+        success: { background: "var(--success)", color: "#fff" },
+        ghost: { background: "transparent", color: "var(--accent)", border: "1px solid var(--accent)" },
+      };
+
+      return (
+        <button
+          style={{ ...base, ...sizes[size], ...variants[variant] }}
+          onClick={onClick}
+          disabled={disabled}
+          onMouseEnter={e => { if (!disabled) e.target.style.transform = "translateY(-2px)"; e.target.style.opacity = disabled ? 0.5 : 0.85; }}
+          onMouseLeave={e => { e.target.style.transform = "translateY(0)"; e.target.style.opacity = disabled ? 0.5 : 1; }}
+        >
+          {label}
+        </button>
+      );
+    }
+
+    // ============================================================
+    // COMPONENT 2: CARD
+    // Props: icon, title, description, variant
+    // ============================================================
+    function Card({ icon = "📚", title = "Card Title", description = "Card description goes here.", variant = "feature" }) {
+      const [hovered, setHovered] = React.useState(false);
+
+      const styles = {
+        card: {
+          background: "var(--surface)",
+          border: `1px solid ${hovered ? "rgba(124,109,250,0.5)" : "var(--border)"}`,
+          borderRadius: "20px",
+          padding: "1.8rem",
+          transition: "all 0.3s ease",
+          transform: hovered ? "translateY(-4px)" : "translateY(0)",
+          boxShadow: hovered ? "0 20px 40px rgba(0,0,0,0.4)" : "none",
+          cursor: "default",
+          position: "relative",
+          overflow: "hidden",
+        },
+        iconBox: {
+          width: "48px", height: "48px",
+          background: "rgba(124,109,250,0.1)",
+          border: "1px solid var(--border)",
+          borderRadius: "12px",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          fontSize: "1.3rem",
+          marginBottom: "1rem",
+        },
+        title: {
+          fontFamily: "'Syne', sans-serif",
+          fontWeight: 700,
+          fontSize: "1.05rem",
+          marginBottom: "0.5rem",
+          color: "var(--text)",
+        },
+        desc: {
+          fontSize: "0.88rem",
+          color: "var(--muted)",
+          lineHeight: 1.65,
+        },
+        topLine: {
+          position: "absolute",
+          top: 0, left: 0, right: 0,
+          height: "1px",
+          background: "linear-gradient(90deg, transparent, var(--accent), transparent)",
+          opacity: hovered ? 1 : 0,
+          transition: "opacity 0.3s",
+        }
+      };
+
+      return (
+        <div style={styles.card} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}>
+          <div style={styles.topLine} />
+          <div style={styles.iconBox}>{icon}</div>
+          <div style={styles.title}>{title}</div>
+          <p style={styles.desc}>{description}</p>
+        </div>
+      );
+    }
+
+    // ============================================================
+    // COMPONENT 3: NAVBAR
+    // Props: brand, links, ctaLabel
+    // ============================================================
+    function Navbar({ brand = "Studex", links = ["Features", "Reviews", "Pricing"], ctaLabel = "Get Started" }) {
+      const [menuOpen, setMenuOpen] = React.useState(false);
+      const [scrolled, setScrolled] = React.useState(false);
+
+      React.useEffect(() => {
+        const handleScroll = () => setScrolled(window.scrollY > 20);
+        window.addEventListener("scroll", handleScroll);
+        return () => window.removeEventListener("scroll", handleScroll);
+      }, []);
+
+      const styles = {
+        nav: {
+          position: "sticky",
+          top: 0,
+          zIndex: 100,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "1.1rem 5%",
+          background: scrolled ? "rgba(10,10,15,0.95)" : "rgba(10,10,15,0.8)",
+          backdropFilter: "blur(12px)",
+          borderBottom: "1px solid var(--border)",
+          transition: "background 0.3s",
+        },
+        logo: {
+          fontFamily: "'Syne', sans-serif",
+          fontWeight: 800,
+          fontSize: "1.3rem",
+          color: "var(--text)",
+          letterSpacing: "-0.03em",
+        },
+        logoSpan: { color: "var(--accent)" },
+        links: {
+          display: "flex",
+          gap: "2rem",
+          listStyle: "none",
+        },
+        link: {
+          fontSize: "0.88rem",
+          color: "var(--muted)",
+          cursor: "pointer",
+          fontWeight: 500,
+          transition: "color 0.2s",
+        },
+        cta: {
+          background: "var(--accent)",
+          color: "#fff",
+          fontFamily: "'Syne', sans-serif",
+          fontWeight: 700,
+          fontSize: "0.85rem",
+          padding: "0.55rem 1.3rem",
+          borderRadius: "100px",
+          border: "none",
+          cursor: "pointer",
+        },
+        hamburger: {
+          display: "none",
+          flexDirection: "column",
+          gap: "5px",
+          background: "none",
+          border: "none",
+          cursor: "pointer",
+          padding: "4px",
+        },
+        bar: {
+          width: "22px", height: "2px",
+          background: "var(--text)",
+          borderRadius: "2px",
+        },
+        mobileMenu: {
+          display: menuOpen ? "flex" : "none",
+          flexDirection: "column",
+          gap: "1rem",
+          padding: "1.2rem 5%",
+          background: "var(--surface)",
+          borderBottom: "1px solid var(--border)",
+        }
+      };
+
+      return (
+        <div>
+          <nav style={styles.nav}>
+            <div style={styles.logo}>
+              {brand.slice(0, -2)}<span style={styles.logoSpan}>{brand.slice(-2)}</span>
+            </div>
+            <ul style={styles.links} className="nav-desktop-links">
+              {links.map((link, i) => (
+                <li key={i} style={styles.link}
+                  onMouseEnter={e => e.target.style.color = "var(--text)"}
+                  onMouseLeave={e => e.target.style.color = "var(--muted)"}
+                >{link}</li>
+              ))}
+            </ul>
+            <button style={styles.cta}>{ctaLabel} →</button>
+          </nav>
+        </div>
+      );
+    }
+
+    // ============================================================
+    // COMPONENT 4: MODAL
+    // Props: isOpen, onClose, title, children
+    // ============================================================
+    function Modal({ isOpen, onClose, title = "Modal Title", children }) {
+      if (!isOpen) return null;
+
+      const styles = {
+        overlay: {
+          position: "fixed",
+          inset: 0,
+          background: "rgba(0,0,0,0.7)",
+          backdropFilter: "blur(4px)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 1000,
+          padding: "1rem",
+        },
+        modal: {
+          background: "var(--surface)",
+          border: "1px solid var(--border)",
+          borderRadius: "24px",
+          padding: "2rem",
+          width: "100%",
+          maxWidth: "460px",
+          position: "relative",
+          animation: "fadeUp 0.3s ease",
+        },
+        header: {
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "1.5rem",
+        },
+        title: {
+          fontFamily: "'Syne', sans-serif",
+          fontWeight: 800,
+          fontSize: "1.2rem",
+        },
+        closeBtn: {
+          background: "var(--surface2)",
+          border: "1px solid var(--border)",
+          color: "var(--muted)",
+          width: "32px", height: "32px",
+          borderRadius: "50%",
+          cursor: "pointer",
+          fontSize: "1rem",
+          display: "flex", alignItems: "center", justifyContent: "center",
+        }
+      };
+
+      return (
+        <div style={styles.overlay} onClick={onClose}>
+          <div style={styles.modal} onClick={e => e.stopPropagation()}>
+            <div style={styles.header}>
+              <span style={styles.title}>{title}</span>
+              <button style={styles.closeBtn} onClick={onClose}>✕</button>
+            </div>
+            {children}
+          </div>
+        </div>
+      );
+    }
+
+    // ============================================================
+    // COMPONENT 5: FORM
+    // Props: title, fields, submitLabel, onSubmit
+    // ============================================================
+    function Form({ title = "Sign Up", fields = [], submitLabel = "Submit", onSubmit }) {
+      const [values, setValues] = React.useState({});
+      const [submitted, setSubmitted] = React.useState(false);
+
+      const handleChange = (name, value) => {
+        setValues(prev => ({ ...prev, [name]: value }));
+      };
+
+      const handleSubmit = () => {
+        setSubmitted(true);
+        setTimeout(() => setSubmitted(false), 3000);
+        if (onSubmit) onSubmit(values);
+      };
+
+      const styles = {
+        form: {
+          display: "flex",
+          flexDirection: "column",
+          gap: "1rem",
+        },
+        label: {
+          fontSize: "0.8rem",
+          color: "var(--muted)",
+          fontWeight: 500,
+          marginBottom: "0.3rem",
+          display: "block",
+          letterSpacing: "0.05em",
+          textTransform: "uppercase",
+        },
+        input: {
+          width: "100%",
+          padding: "0.75rem 1rem",
+          background: "var(--surface2)",
+          border: "1px solid var(--border)",
+          borderRadius: "12px",
+          color: "var(--text)",
+          fontFamily: "'DM Sans', sans-serif",
+          fontSize: "0.92rem",
+          outline: "none",
+          transition: "border-color 0.2s",
+        },
+        success: {
+          background: "rgba(16,185,129,0.1)",
+          border: "1px solid rgba(16,185,129,0.3)",
+          borderRadius: "12px",
+          padding: "0.75rem 1rem",
+          color: "#10b981",
+          fontSize: "0.88rem",
+          textAlign: "center",
+        }
+      };
+
+      if (submitted) {
+        return <div style={styles.success}>✅ Successfully submitted! Welcome to Studex.</div>;
+      }
+
+      return (
+        <div style={styles.form}>
+          {fields.map((field, i) => (
+            <div key={i}>
+              <label style={styles.label}>{field.label}</label>
+              <input
+                style={styles.input}
+                type={field.type || "text"}
+                placeholder={field.placeholder || ""}
+                onChange={e => handleChange(field.name, e.target.value)}
+                onFocus={e => e.target.style.borderColor = "var(--accent)"}
+                onBlur={e => e.target.style.borderColor = "var(--border)"}
+              />
+            </div>
+          ))}
+          <Button label={submitLabel} variant="primary" size="md" onClick={handleSubmit} />
+        </div>
+      );
+    }
+
+    // ============================================================
+    // COMPONENT 6: BADGE
+    // Props: label, color
+    // ============================================================
+    function Badge({ label = "New", color = "accent" }) {
+      const colors = {
+        accent: { bg: "rgba(37,99,235,0.15)", text: "#2563eb", border: "rgba(37,99,235,0.3)" },
+        success: { bg: "rgba(16,185,129,0.15)", text: "#10b981", border: "rgba(16,185,129,0.3)" },
+        warning: { bg: "rgba(247,201,72,0.15)", text: "#f7c948", border: "rgba(247,201,72,0.3)" },
+        danger: { bg: "rgba(239,68,68,0.15)", text: "#ef4444", border: "rgba(239,68,68,0.3)" },
+      };
+
+      const c = colors[color] || colors.accent;
+
+      return (
+        <span style={{
+          background: c.bg,
+          color: c.text,
+          border: `1px solid ${c.border}`,
+          borderRadius: "100px",
+          padding: "0.25rem 0.75rem",
+          fontSize: "0.75rem",
+          fontWeight: 700,
+          fontFamily: "'Syne', sans-serif",
+          letterSpacing: "0.05em",
+          display: "inline-block",
+        }}>
+          {label}
+        </span>
+      );
+    }
+
+    // ============================================================
+    // DEMO PAGE — Shows all components
+    // ============================================================
+    function App() {
+      const [modalOpen, setModalOpen] = React.useState(false);
+
+      const sectionStyle = {
+        maxWidth: "1100px",
+        margin: "0 auto",
+        padding: "4rem 5%",
+      };
+
+      const headingStyle = {
+        fontFamily: "'Syne', sans-serif",
+        fontSize: "0.7rem",
+        fontWeight: 700,
+        letterSpacing: "0.15em",
+        textTransform: "uppercase",
+        color: "var(--accent)",
+        marginBottom: "0.6rem",
+      };
+
+      const titleStyle = {
+        fontFamily: "'Syne', sans-serif",
+        fontSize: "clamp(1.6rem, 3vw, 2.2rem)",
+        fontWeight: 800,
+        letterSpacing: "-0.03em",
+        marginBottom: "2rem",
+      };
+
+      const dividerStyle = {
+        border: "none",
+        borderTop: "1px solid var(--border)",
+        margin: "0",
+      };
+
+      const gridStyle = {
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+        gap: "1.2rem",
+        marginBottom: "1.5rem",
+      };
+
+      const rowStyle = {
+        display: "flex",
+        flexWrap: "wrap",
+        gap: "1rem",
+        alignItems: "center",
+        marginBottom: "1rem",
+      };
+
+      return (
+        <div>
+          {/* NAVBAR DEMO */}
+          <Navbar
+            brand="Studex"
+            links={["Features", "Reviews", "Pricing", "About"]}
+            ctaLabel="Get Started"
+          />
+
+          {/* HERO */}
+          <div style={{ textAlign: "center", padding: "5rem 5% 3rem", borderBottom: "1px solid var(--border)" }}>
+            <Badge label="Component Library v1.0" color="accent" />
+            <h1 style={{ fontFamily: "'Syne', sans-serif", fontSize: "clamp(2rem, 5vw, 3.5rem)", fontWeight: 800, letterSpacing: "-0.04em", margin: "1.2rem 0 1rem" }}>
+              Studex UI Components
+            </h1>
+            <p style={{ color: "var(--muted)", maxWidth: "480px", margin: "0 auto", fontSize: "1rem" }}>
+              A reusable component library built for the Studex study productivity platform. Every component accepts props for full customization.
+            </p>
+          </div>
+
+          {/* BUTTONS */}
+          <section style={sectionStyle}>
+            <p style={headingStyle}>Component 01</p>
+            <h2 style={titleStyle}>Button</h2>
+            <p style={{ color: "var(--muted)", marginBottom: "2rem", fontSize: "0.92rem" }}>
+              Accepts props: <code style={{ color: "var(--accent)" }}>label</code>, <code style={{ color: "var(--accent)" }}>variant</code>, <code style={{ color: "var(--accent)" }}>size</code>, <code style={{ color: "var(--accent)" }}>disabled</code>, <code style={{ color: "var(--accent)" }}>onClick</code>
+            </p>
+            <div style={rowStyle}>
+              <Button label="Primary" variant="primary" size="md" />
+              <Button label="Secondary" variant="secondary" size="md" />
+              <Button label="Ghost" variant="ghost" size="md" />
+              <Button label="Danger" variant="danger" size="md" />
+              <Button label="Success" variant="success" size="md" />
+            </div>
+            <div style={rowStyle}>
+              <Button label="Small" variant="primary" size="sm" />
+              <Button label="Medium" variant="primary" size="md" />
+              <Button label="Large" variant="primary" size="lg" />
+              <Button label="Disabled" variant="primary" size="md" disabled={true} />
+            </div>
+          </section>
+          <hr style={dividerStyle} />
+
+          {/* CARDS */}
+          <section style={sectionStyle}>
+            <p style={headingStyle}>Component 02</p>
+            <h2 style={titleStyle}>Card</h2>
+            <p style={{ color: "var(--muted)", marginBottom: "2rem", fontSize: "0.92rem" }}>
+              Accepts props: <code style={{ color: "var(--accent)" }}>icon</code>, <code style={{ color: "var(--accent)" }}>title</code>, <code style={{ color: "var(--accent)" }}>description</code>
+            </p>
+            <div style={gridStyle}>
+              <Card icon="⏱️" title="Smart Timer" description="Adaptive focus sessions that adjust to your energy levels throughout the day." />
+              <Card icon="🧠" title="AI Flashcards" description="Upload your notes and our AI automatically generates high-quality study cards." />
+              <Card icon="📊" title="Analytics" description="Track your study hours, retention rates and weak spots with beautiful dashboards." />
+            </div>
+          </section>
+          <hr style={dividerStyle} />
+
+          {/* BADGES */}
+          <section style={sectionStyle}>
+            <p style={headingStyle}>Component 03</p>
+            <h2 style={titleStyle}>Badge</h2>
+            <p style={{ color: "var(--muted)", marginBottom: "2rem", fontSize: "0.92rem" }}>
+              Accepts props: <code style={{ color: "var(--accent)" }}>label</code>, <code style={{ color: "var(--accent)" }}>color</code>
+            </p>
+            <div style={rowStyle}>
+              <Badge label="New Feature" color="accent" />
+              <Badge label="Active" color="success" />
+              <Badge label="Pending" color="warning" />
+              <Badge label="Removed" color="danger" />
+            </div>
+          </section>
+          <hr style={dividerStyle} />
+
+          {/* MODAL */}
+          <section style={sectionStyle}>
+            <p style={headingStyle}>Component 04</p>
+            <h2 style={titleStyle}>Modal</h2>
+            <p style={{ color: "var(--muted)", marginBottom: "2rem", fontSize: "0.92rem" }}>
+              Accepts props: <code style={{ color: "var(--accent)" }}>isOpen</code>, <code style={{ color: "var(--accent)" }}>onClose</code>, <code style={{ color: "var(--accent)" }}>title</code>, <code style={{ color: "var(--accent)" }}>children</code>
+            </p>
+            <Button label="Open Modal" variant="primary" onClick={() => setModalOpen(true)} />
+            <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title="Join Studex Free">
+              <Form
+                fields={[
+                  { label: "Full Name", name: "name", type: "text", placeholder: "Ubah Joy" },
+                  { label: "Email Address", name: "email", type: "email", placeholder: "you@example.com" },
+                  { label: "Password", name: "password", type: "password", placeholder: "Create a password" },
+                ]}
+                submitLabel="Create My Account"
+              />
+            </Modal>
+          </section>
+          <hr style={dividerStyle} />
+
+          {/* FORM */}
+          <section style={sectionStyle}>
+            <p style={headingStyle}>Component 05</p>
+            <h2 style={titleStyle}>Form</h2>
+            <p style={{ color: "var(--muted)", marginBottom: "2rem", fontSize: "0.92rem" }}>
+              Accepts props: <code style={{ color: "var(--accent)" }}>fields</code>, <code style={{ color: "var(--accent)" }}>submitLabel</code>, <code style={{ color: "var(--accent)" }}>onSubmit</code>
+            </p>
+            <div style={{ maxWidth: "420px" }}>
+              <Form
+                fields={[
+                  { label: "Email Address", name: "email", type: "email", placeholder: "you@example.com" },
+                  { label: "Message", name: "message", type: "text", placeholder: "How can we help?" },
+                ]}
+                submitLabel="Send Message →"
+              />
+            </div>
+          </section>
+
+          {/* FOOTER */}
+          <footer style={{ borderTop: "1px solid var(--border)", padding: "2rem 5%", textAlign: "center" }}>
+            <p style={{ color: "var(--muted)", fontSize: "0.85rem" }}>
+              Studex Component Library — Built with React • Task 2 Submission
+            </p>
+          </footer>
+
+          <style>{`
+            @keyframes fadeUp {
+              from { opacity: 0; transform: translateY(20px); }
+              to { opacity: 1; transform: translateY(0); }
+            }
+            code { font-family: monospace; font-size: 0.85em; }
+          `}</style>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(<App />);
+  </script>
+</body>
+</html>
